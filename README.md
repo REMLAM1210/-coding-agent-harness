@@ -2,6 +2,20 @@
 
 A self-coded coding agent harness kernel with a deep feedback loop (validators -> classifier -> feedback loop).
 
+## Live Deployment
+
+**WebUI:** https://coding-agent-harness-syqp.onrender.com
+
+- `/` — WebUI (task input, real-time event log, HITL approval)
+- `/health` — health check
+- `/docs` — FastAPI auto-docs (OpenAPI)
+- `POST /sessions` — create a coding task session
+- `GET /sessions/{id}` — query session status
+- `POST /sessions/{id}/approve` — HITL approval
+- `GET /sessions/{id}/stream` — WebSocket event stream
+
+> Free-tier: service sleeps after 15 min idle; first request takes ~30s cold start.
+
 ## Install
 
 ```bash
@@ -28,6 +42,10 @@ Open http://localhost:8000/static/index.html
 docker build -t coding-agent-harness .
 docker run -p 8000:8000 -e HARNESS_API_KEY=your-key coding-agent-harness
 ```
+The container reads `$PORT` (defaults to 8000) and exposes a `/health` endpoint.
+
+### Cloud Deployment (Render)
+Deployed via `render.yaml` (Docker runtime, free tier). The `HARNESS_API_KEY` env var is set in the Render dashboard (never baked into the image). See `render.yaml` for the service blueprint.
 
 ## Tests
 ```bash
