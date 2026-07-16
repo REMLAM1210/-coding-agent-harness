@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coding Agent Harness</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div id="app">
+        <header><h1>Coding Agent Harness</h1></header>
+        <main>
+            <section id="task-input">
+                <textarea id="task" placeholder="Describe a coding task..."></textarea>
+                <button id="submit-btn">Run Agent</button>
+            </section>
+            <section id="event-log">
+                <h2>Agent Loop</h2>
+                <div id="events"></div>
+            </section>
+            <section id="hitl" hidden>
+                <h2>Approval Required</h2>
+                <p id="hitl-action"></p>
+                <button id="approve-btn">Approve</button>
+                <button id="deny-btn">Deny</button>
+            </section>
+        </main>
+    </div>
+    <script src="/static/app.js"></script>
+</body>
+</html>

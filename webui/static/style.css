@@ -1,0 +1,12 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: monospace; background: #1e1e1e; color: #d4d4d4; padding: 1rem; }
+header h1 { margin-bottom: 1rem; }
+#task-input textarea { width: 100%; height: 80px; background: #2d2d2d; color: #d4d4d4; border: 1px solid #555; padding: 0.5rem; }
+#submit-btn { margin-top: 0.5rem; padding: 0.5rem 1rem; background: #0e639c; color: white; border: none; cursor: pointer; }
+#events { margin-top: 1rem; max-height: 500px; overflow-y: auto; }
+.event { padding: 0.3rem; border-bottom: 1px solid #333; }
+.event-feedback { color: #f9ca24; }
+.event-error { color: #e06c75; }
+.event-success { color: #98c379; }
+#hitl { margin-top: 1rem; padding: 1rem; background: #3d2d00; border: 1px solid #f9ca24; }
+#hitl button { margin-right: 0.5rem; padding: 0.3rem 1rem; }
