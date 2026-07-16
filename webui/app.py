@@ -203,4 +203,13 @@ def create_app(config_path: str | None = None, max_concurrent: int | None = None
     if os.path.isdir(static_dir):
         app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
+    @app.get("/health")
+    async def health():
+        return {"status": "ok"}
+
+    @app.get("/")
+    async def root():
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse(url="/static/index.html")
+
     return app

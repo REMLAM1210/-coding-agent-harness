@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: coding-agent-harness
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: HARNESS_API_KEY
+        sync: false
+      - key: PYTHON_VERSION
+        value: "3.12"
