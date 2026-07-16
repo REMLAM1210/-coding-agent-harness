@@ -37,6 +37,10 @@ class ToolDispatcher:
         self._sandbox = sandbox
         self._approval_resolver = approval_resolver
 
+    @property
+    def guardrail(self) -> GuardrailProtocol:
+        return self._guardrail
+
     def dispatch(self, action: Action, workspace: Workspace) -> ActionResult | FeedbackSignal:
         decision = self._guardrail.check(action)
         if decision.verdict == DecisionType.ALLOW:

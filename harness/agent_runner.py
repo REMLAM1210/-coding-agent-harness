@@ -89,6 +89,9 @@ class AgentRunner:
                 self._sink.emit(LoopFinished(session_id="", reason=f"Done: {action.args.get('summary', '')}"))
                 return
 
+            g_decision = self._dispatcher.guardrail.check(action)
+            self._sink.emit(GuardrailDecision(action=action, verdict=g_decision.verdict, reason=g_decision.reason))
+
             result = self._dispatcher.dispatch(action, workspace)
 
             if isinstance(result, FeedbackSignal) and result.reason:
