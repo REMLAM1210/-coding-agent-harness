@@ -28,10 +28,3 @@ class HitlStateMachine:
                 source="hitl", passed=False, failures=[],
                 summary="", raw="", reason=decision.reason or "approval_denied",
             )
-        else:
-            self.state = "TIMEOUT"
-            self.state = "IDLE"
-            return FeedbackSignal(
-                source="hitl", passed=False, failures=[],
-                summary="", raw="", reason="approval_timeout",
-            )
