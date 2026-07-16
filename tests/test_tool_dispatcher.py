@@ -18,12 +18,19 @@ class FakeGuardrail:
 
 
 class FakeSandbox:
+    def __init__(self, tools: list[Tool] | None = None):
+        self._tools = tools or []
+
     def execute(self, action: Action, workspace: Workspace) -> ActionResult:
-        return ActionResult(success=True, output="executed")
+        for tool in self._tools:
+            if tool.can_handle(action):
+                return tool.execute(action, workspace)
+        return ActionResult(success=False, error=f"No tool can handle action type '{action.type}'")
 
 
 def test_dispatch_allow():
-    td = ToolDispatcher(tools=[FakeTool()], guardrail=FakeGuardrail(), sandbox=FakeSandbox())
+    tool = FakeTool()
+    td = ToolDispatcher(tools=[tool], guardrail=FakeGuardrail(), sandbox=FakeSandbox(tools=[tool]))
     result = td.dispatch(Action(type="ReadFile", args={"path": "foo.py"}), Workspace(cwd="/tmp"))
     assert result.success
     assert result.output == "file content"

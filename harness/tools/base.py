@@ -42,7 +42,7 @@ class ToolDispatcher:
     def dispatch(self, action: Action, workspace: Workspace) -> ActionResult | FeedbackSignal:
         decision = self._guardrail.check(action)
         if decision.verdict == DecisionType.ALLOW:
-            return self._execute(action, workspace)
+            return self._sandbox.execute(action, workspace)
         elif decision.verdict == DecisionType.DENY:
             return FeedbackSignal(
                 source="guardrail", passed=False, failures=[],
@@ -56,17 +56,11 @@ class ToolDispatcher:
                 )
             approval = self._approval_resolver.request_approval(action)
             if approval.verdict == DecisionType.ALLOW:
-                return self._execute(action, workspace)
+                return self._sandbox.execute(action, workspace)
             else:
                 return FeedbackSignal(
                     source="hitl", passed=False, failures=[],
                     summary="", raw="", reason=approval.reason or "approval_denied",
                 )
         return ActionResult(success=False, error="unknown verdict")
-
-    def _execute(self, action: Action, workspace: Workspace) -> ActionResult | FeedbackSignal:
-        for tool in self._tools:
-            if tool.can_handle(action):
-                return tool.execute(action, workspace)
-        return ActionResult(success=False, error=f"no tool can handle action type '{action.type}'")
 
