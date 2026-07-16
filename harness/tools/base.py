@@ -29,12 +29,10 @@ class ApprovalResolverProtocol(ABC):
 class ToolDispatcher:
     def __init__(
         self,
-        tools: list[Tool],
         guardrail: GuardrailProtocol,
         sandbox: SandboxProtocol,
         approval_resolver: ApprovalResolverProtocol | None = None,
     ):
-        self._tools = tools
         self._guardrail = guardrail
         self._sandbox = sandbox
         self._approval_resolver = approval_resolver
