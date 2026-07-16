@@ -30,7 +30,7 @@ feedback_thresholds:
   escalation_threshold: 2
 
 llm_settings:
-  model: gpt-4o-mini
+  model: glm-5.2
   temperature: 0.0
 
 hints:

@@ -21,7 +21,9 @@ Available actions:
 Respond with EXACTLY ONE JSON object per turn:
   {"type": "<ActionType>", "args": {<action-specific args>}}
 
-Do not include any text outside the JSON object."""
+Do not include any text outside the JSON object.
+
+CRITICAL: After completing the requested task (e.g., after writing a file), you MUST respond with Done to finish. Do NOT repeat the same action. If the previous tool call succeeded, move on to the next step or finish with Done."""
 
 
 def parse_action_response(raw: str) -> Action | FeedbackSignal:
