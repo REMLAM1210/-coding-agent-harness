@@ -131,7 +131,7 @@ class ToolCallStarted:
 @dataclass
 class ToolCallResult:
     action: Action
-    result: ActionResult
+    result: ActionResult | RawExecutionResult
 
 @dataclass
 class FeedbackSignalEmitted:

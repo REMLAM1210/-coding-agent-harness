@@ -26,9 +26,10 @@ def cmd_run(args):
     from harness.tools.feedback_tools import RunTestsTool, RunLintTool, RunTypeCheckTool
     from harness.governance.guardrail import Guardrail
     from harness.governance.sandbox import Sandbox
-    from harness.feedback.validators import PytestValidator
+    from harness.feedback.validators import PytestValidator, RuffValidator, MypyValidator
     from harness.feedback.classifier import Classifier
     from harness.feedback.feedback_loop import FeedbackLoop
+    from harness.memory.store import MemoryStore
 
     tmpdir = tempfile.mkdtemp()
     tools = [ReadFileTool(), WriteFileTool(), ListFilesTool(), RunShellTool(timeout=cfg.sandbox_timeout),
@@ -39,11 +40,13 @@ def cmd_run(args):
     td = ToolDispatcher(guardrail=guardrail, sandbox=sandbox)
     llm = RealLLMClient(api_key=key, base_url="https://njusehub.info/v1", model=cfg.llm_settings.get("model", "gpt-4o-mini"))
     sink = RecordingEventSink()
+    memory = MemoryStore(workspace_dir=tmpdir)
     runner = AgentRunner(
-        llm_client=llm, dispatcher=td, validator=PytestValidator(),
+        llm_client=llm, dispatcher=td,
+        validators={"RunTests": PytestValidator(), "RunLint": RuffValidator(), "RunTypeCheck": MypyValidator()},
         classifier=Classifier(hints=cfg.hints),
         feedback_loop=FeedbackLoop(max_iterations=cfg.max_iterations, escalation_threshold=cfg.feedback_thresholds["escalation_threshold"]),
-        config=cfg, event_sink=sink,
+        config=cfg, event_sink=sink, memory_store=memory,
     )
     runner.run(args.task, Workspace(cwd=tmpdir))
     for event in sink.events:
