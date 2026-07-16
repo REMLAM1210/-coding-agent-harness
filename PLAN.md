@@ -2112,7 +2112,7 @@ def make_runner(actions, tmpdir):
     tools = [WriteFileTool(), ReadFileTool(), RunShellTool(timeout=5), RunTestsTool(timeout=10)]
     guardrail = Guardrail(rules=cfg.guardrail_rules)
     sandbox = Sandbox(tools=tools, timeout=cfg.sandbox_timeout, env_whitelist=cfg.sandbox_env_whitelist)
-    td = ToolDispatcher(tools=tools, guardrail=guardrail, sandbox=sandbox)
+    td = ToolDispatcher(guardrail=guardrail, sandbox=sandbox)
     llm = MockLLMClient(actions=actions)
     validator = PytestValidator()
     classifier = Classifier(hints=cfg.hints)
@@ -2152,7 +2152,7 @@ def test_loop_max_iterations_abort():
         tools = [ReadFileTool()]
         guardrail = Guardrail()
         sandbox = Sandbox(tools=tools, timeout=5)
-        td = ToolDispatcher(tools=tools, guardrail=guardrail, sandbox=sandbox)
+        td = ToolDispatcher(guardrail=guardrail, sandbox=sandbox)
         llm = MockLLMClient(responder=responder)
         fl = FeedbackLoop(max_iterations=3, escalation_threshold=5)
         sink = RecordingEventSink()
@@ -3068,7 +3068,7 @@ def cmd_run(args):
              RunTypeCheckTool(timeout=cfg.sandbox_timeout)]
     guardrail = Guardrail(rules=cfg.guardrail_rules)
     sandbox = Sandbox(tools=tools, timeout=cfg.sandbox_timeout, env_whitelist=cfg.sandbox_env_whitelist)
-    td = ToolDispatcher(tools=tools, guardrail=guardrail, sandbox=sandbox)
+    td = ToolDispatcher(guardrail=guardrail, sandbox=sandbox)
     llm = RealLLMClient(api_key=key, base_url="https://njusehub.info/v1", model=cfg.llm_settings.get("model", "gpt-4o-mini"))
     sink = RecordingEventSink()
     runner = AgentRunner(
@@ -3174,7 +3174,7 @@ def _make_runner(actions, tmpdir, cfg=None, validator=None):
     ]
     guardrail = Guardrail(rules=rules)
     sandbox = Sandbox(tools=tools, timeout=cfg.sandbox_timeout, env_whitelist=cfg.sandbox_env_whitelist)
-    td = ToolDispatcher(tools=tools, guardrail=guardrail, sandbox=sandbox)
+    td = ToolDispatcher(guardrail=guardrail, sandbox=sandbox)
     llm = MockLLMClient(actions=actions)
     fl = FeedbackLoop(max_iterations=cfg.max_iterations, escalation_threshold=cfg.feedback_thresholds["escalation_threshold"])
     sink = RecordingEventSink()
@@ -3287,7 +3287,7 @@ def test_demo_stagnation_detection():
         tools = [RunTestsTool(timeout=10)]
         guardrail = Guardrail()
         sandbox = Sandbox(tools=tools, timeout=10)
-        td = ToolDispatcher(tools=tools, guardrail=guardrail, sandbox=sandbox)
+        td = ToolDispatcher(guardrail=guardrail, sandbox=sandbox)
         llm = MockLLMClient(responder=responder)
         fl = FeedbackLoop(max_iterations=10, escalation_threshold=10)
         sink = RecordingEventSink()
