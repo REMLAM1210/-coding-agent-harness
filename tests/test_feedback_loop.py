@@ -50,3 +50,12 @@ def test_passed_signal_retries_same():
     fc = FailureClassification(category="PASSED", hint="", priority=99)
     rd = fl.decide(sig, fc, attempt_count=1, failure_history=[])
     assert rd.strategy == RetryStrategy.RETRY_SAME
+
+
+def test_category_threshold_triggers_escalate():
+    fl = FeedbackLoop(max_iterations=20, escalation_threshold=3)
+    sig = make_signal(["a"])
+    fc = FailureClassification(category="ASSERTION_FAILURE", hint="", priority=3)
+    history = [make_signal(["b"]), make_signal(["c"]), make_signal(["d"])]
+    rd = fl.decide(sig, fc, attempt_count=4, failure_history=history)
+    assert rd.strategy == RetryStrategy.ESCALATE
