@@ -45,3 +45,39 @@ def test_list_files():
         assert result.success
         files = result.output.strip().split("\n")
         assert set(files) == {"a.py", "b.py"}
+
+
+def test_path_traversal_prefix_confusion_blocked():
+    # cwd is a directory whose name is a prefix of a sibling directory.
+    # Old startswith-based check would let ../foobar/x slip through because
+    # "/tmp/foo" is a string prefix of "/tmp/foobar/x".
+    with tempfile.TemporaryDirectory() as base:
+        cwd = os.path.join(base, "foo")
+        sibling = os.path.join(base, "foobar")
+        os.makedirs(cwd)
+        os.makedirs(sibling)
+        secret = os.path.join(sibling, "secret.txt")
+        with open(secret, "w") as f:
+            f.write("private")
+        ws = Workspace(cwd=cwd)
+        rt = ReadFileTool()
+        result = rt.execute(Action(type="ReadFile", args={"path": "../foobar/secret.txt"}), ws)
+        assert result.success is False
+        assert "traversal" in result.error.lower() or "outside" in result.error.lower()
+
+
+def test_list_files_rejects_outside_workspace():
+    # A glob pattern that escapes the workspace must not leak sibling files.
+    with tempfile.TemporaryDirectory() as base:
+        cwd = os.path.join(base, "foo")
+        sibling = os.path.join(base, "foobar")
+        os.makedirs(cwd)
+        os.makedirs(sibling)
+        secret = os.path.join(sibling, "leak.txt")
+        with open(secret, "w") as f:
+            f.write("private")
+        ws = Workspace(cwd=cwd)
+        lt = ListFilesTool()
+        result = lt.execute(Action(type="ListFiles", args={"pattern": "../foobar/*.txt"}), ws)
+        assert result.success
+        assert result.output.strip() == ""

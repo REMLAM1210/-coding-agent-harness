@@ -7,7 +7,11 @@ from harness.tools.base import Tool
 
 def _resolve_safe(path: str, cwd: str) -> str | None:
     full = os.path.normpath(os.path.join(cwd, path))
-    if not full.startswith(os.path.normpath(cwd)):
+    norm_cwd = os.path.normpath(cwd)
+    try:
+        if os.path.commonpath([full, norm_cwd]) != norm_cwd:
+            return None
+    except ValueError:
         return None
     return full
 
@@ -44,5 +48,13 @@ class ListFilesTool(Tool):
     def execute(self, action: Action, workspace: Workspace) -> ActionResult:
         pattern = action.args.get("pattern", "*")
         matches = glob.glob(os.path.join(workspace.cwd, pattern))
-        files = sorted(os.path.relpath(m, workspace.cwd) for m in matches if os.path.isfile(m))
+        safe_files = []
+        for m in matches:
+            if not os.path.isfile(m):
+                continue
+            full = _resolve_safe(os.path.relpath(m, workspace.cwd), workspace.cwd)
+            if full is None:
+                continue
+            safe_files.append(os.path.relpath(m, workspace.cwd))
+        files = sorted(safe_files)
         return ActionResult(success=True, output="\n".join(files))
