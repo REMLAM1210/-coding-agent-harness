@@ -1,0 +1,72 @@
+from __future__ import annotations
+from abc import ABC, abstractmethod
+from harness.models import Action, ActionResult, Decision, DecisionType, Workspace
+from harness.feedback.models import FeedbackSignal
+
+
+class Tool(ABC):
+    @abstractmethod
+    def can_handle(self, action: Action) -> bool: ...
+    @abstractmethod
+    def execute(self, action: Action, workspace: Workspace) -> ActionResult: ...
+
+
+class GuardrailProtocol(ABC):
+    @abstractmethod
+    def check(self, action: Action) -> Decision: ...
+
+
+class SandboxProtocol(ABC):
+    @abstractmethod
+    def execute(self, action: Action, workspace: Workspace) -> ActionResult: ...
+
+
+class ApprovalResolverProtocol(ABC):
+    @abstractmethod
+    def request_approval(self, action: Action) -> Decision: ...
+
+
+class ToolDispatcher:
+    def __init__(
+        self,
+        tools: list[Tool],
+        guardrail: GuardrailProtocol,
+        sandbox: SandboxProtocol,
+        approval_resolver: ApprovalResolverProtocol | None = None,
+    ):
+        self._tools = tools
+        self._guardrail = guardrail
+        self._sandbox = sandbox
+        self._approval_resolver = approval_resolver
+
+    def dispatch(self, action: Action, workspace: Workspace) -> ActionResult | FeedbackSignal:
+        decision = self._guardrail.check(action)
+        if decision.verdict == DecisionType.ALLOW:
+            return self._execute(action, workspace)
+        elif decision.verdict == DecisionType.DENY:
+            return FeedbackSignal(
+                source="guardrail", passed=False, failures=[],
+                summary="", raw="", reason=decision.reason or "guardrail_denied",
+            )
+        elif decision.verdict == DecisionType.REQUIRE_APPROVAL:
+            if self._approval_resolver is None:
+                return FeedbackSignal(
+                    source="guardrail", passed=False, failures=[],
+                    summary="", raw="", reason="no_approval_resolver",
+                )
+            approval = self._approval_resolver.request_approval(action)
+            if approval.verdict == DecisionType.ALLOW:
+                return self._execute(action, workspace)
+            else:
+                return FeedbackSignal(
+                    source="hitl", passed=False, failures=[],
+                    summary="", raw="", reason=approval.reason or "approval_denied",
+                )
+        return ActionResult(success=False, error="unknown verdict")
+
+    def _execute(self, action: Action, workspace: Workspace) -> ActionResult | FeedbackSignal:
+        for tool in self._tools:
+            if tool.can_handle(action):
+                return tool.execute(action, workspace)
+        return ActionResult(success=False, error=f"no tool can handle action type '{action.type}'")
+
