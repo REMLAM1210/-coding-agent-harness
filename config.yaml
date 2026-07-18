@@ -1,0 +1,44 @@
+max_iterations: 20
+sandbox_timeout: 30
+hitl_timeout: 300
+max_concurrent_sessions: 5
+
+guardrail_rules:
+  - name: block_rm_rf
+    pattern: 'rm\s+-rf'
+    action_type: RunShell
+    verdict: DENY
+    reason: destructive command
+  - name: block_force_push
+    pattern: 'git\s+push.*--force'
+    action_type: RunShell
+    verdict: DENY
+    reason: force push
+  - name: approve_pip_install
+    pattern: 'pip\s+install'
+    action_type: RunShell
+    verdict: REQUIRE_APPROVAL
+    reason: network install
+  - name: block_path_traversal
+    pattern: '\.\.'
+    action_type: WriteFile
+    verdict: DENY
+    reason: path traversal
+
+feedback_thresholds:
+  max_retries_per_class: 3
+  escalation_threshold: 2
+
+llm_settings:
+  model: glm-5.2
+  temperature: 0.0
+
+hints:
+  ASSERTION_FAILURE: "The test ran but the assertion failed. Check the logic in the failing test."
+  IMPORT_ERROR: "A module could not be imported. Check import paths and dependencies."
+  SYNTAX_ERROR: "The code has a syntax error and cannot be parsed."
+  COLLECTION_ERROR: "pytest could not collect the test files. Check for import or syntax errors."
+  TYPE_ERROR: "mypy found a type violation. Check the type annotations."
+  LINT_VIOLATION: "ruff found a style or convention violation."
+  TIMEOUT: "The command timed out. Check for infinite loops or long-running operations."
+  UNKNOWN: "An unclassified error occurred. Check the raw output."
