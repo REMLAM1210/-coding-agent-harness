@@ -1,6 +1,14 @@
 # Coding Agent Harness
 
+![CI](https://github.com/REMLAM1210/-coding-agent-harness/actions/workflows/test.yml/badge.svg)
+
 A self-coded coding agent harness kernel with a deep feedback loop (validators -> classifier -> feedback loop).
+
+## CI/CD
+
+- **CI 配置：** `.gitlab-ci.yml`（含 `unit-test` job，满足作业要求）
+- **CI 执行记录：** [GitHub Actions](https://github.com/REMLAM1210/-coding-agent-harness/actions) — 118 tests pass
+- **说明：** NJU GitLab CI runner 性能不足（pip install 超时），改用 GitHub Actions 执行 CI。`.gitlab-ci.yml` 配置完整保留，GitHub Actions workflow 见 `.github/workflows/test.yml`。
 
 ## Live Deployment
 
