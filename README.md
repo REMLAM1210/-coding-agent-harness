@@ -64,4 +64,51 @@ pytest tests/test_demos.py -v  # Mechanism demos
 - Credential access controlled by harness, not LLM
 
 ## Directory Structure
-See SPEC.md section 5.5 for full module breakdown.
+
+```
+agentproject/
+├── harness/                      # Harness kernel (deliverable主体)
+│   ├── agent_runner.py           #   Main loop (context→LLM→dispatch→feedback→stop)
+│   ├── config.py                 #   YAML config loader
+│   ├── models.py                 #   Action/ActionResult/RawExecutionResult/Context/AgentEvent/...
+│   ├── llm/
+│   │   ├── base.py               #   LLMClient ABC: propose_action(ctx)->Action
+│   │   ├── mock_client.py        #   MockLLMClient (queue + responder modes, offline tests)
+│   │   └── real_client.py        #   RealLLMClient (NJU endpoint, OpenAI-compatible)
+│   ├── tools/
+│   │   ├── base.py               #   Tool ABC + ToolDispatcher (single-point: guardrail→sandbox)
+│   │   ├── file_tools.py         #   ReadFile/WriteFile/ListFiles (path traversal protection)
+│   │   ├── shell_tool.py         #   RunShell (env whitelist + timeout)
+│   │   └── feedback_tools.py     #   RunTests/RunLint/RunTypeCheck (→ RawExecutionResult)
+│   ├── governance/
+│   │   ├── guardrail.py          #   Guardrail rule engine (regex patterns → Decision)
+│   │   ├── sandbox.py             #   Sandbox (cwd lock + env whitelist + tool delegation)
+│   │   └── hitl.py               #   HITL state machine (IDLE→PENDING→APPROVED|DENIED|TIMEOUT)
+│   ├── feedback/                 # ★ Focus dimension (main contribution)
+│   │   ├── models.py             #   FeedbackSignal/FailureItem/FailureClassification/RetryDecision
+│   │   ├── validators.py         #   PytestValidator/RuffValidator/MypyValidator
+│   │   ├── classifier.py         #   Failure classification + priority merging
+│   │   └── feedback_loop.py      #   Retry/escalate/stagnation-oscillation detection
+│   └── memory/
+│   │   └── store.py              #   Key-value memory (persists to .harness/memory.json)
+├── webui/                        # Thin layer (FastAPI + frontend)
+│   ├── app.py                    #   FastAPI app factory
+│   ├── routes.py                 #   REST + WebSocket endpoints
+│   ├── session_registry.py       #   Session state + WebSocket reconnect/replay
+│   └── static/                   #   Vanilla HTML/CSS/JS frontend
+├── credman/
+│   └── store.py                  # Credential store (keyring → env → .env fallback)
+├── cli.py                        # Thin CLI frontend
+├── tests/                        # 118 mock-LLM offline unit tests + 3 mechanism demos
+│   └── test_demos.py             #   A.6 mechanism demos (guardrail/feedback/stagnation)
+├── config.yaml                   # Declarative config (guardrail rules, hints, thresholds)
+├── Dockerfile                    # Container image build
+├── .dockerignore
+├── .gitlab-ci.yml                # CI: unit-test (every push) + build-image (main)
+├── render.yaml                   # Render deployment blueprint
+├── pyproject.toml
+├── SPEC.md / PLAN.md / SPEC_PROCESS.md / AGENT_LOG.md / REFLECTION.md
+└── README.md
+```
+
+See SPEC.md §5.5 for the module boundary rationale and §5.6 for the three design conventions.
