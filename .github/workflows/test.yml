@@ -1,0 +1,26 @@
+name: unit-test
+
+on:
+  push:
+    branches: [main, master, feat/harness-implementation]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install --prefer-binary -e ".[dev]"
+
+      - name: Run tests
+        run: pytest tests/ -v --timeout=60
