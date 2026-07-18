@@ -6,10 +6,17 @@ stages:
 unit-test:
   stage: test
   image: python:3.12-slim
+  timeout: 10 minutes
+  cache:
+    key: pip-${CI_COMMIT_REF_SLUG}
+    paths:
+      - .cache/pip
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   before_script:
-    - pip install -e ".[dev]"
+    - pip install --prefer-binary --cache-dir .cache/pip -e ".[dev]"
   script:
-    - pytest tests/ -v
+    - pytest tests/ -v --timeout=60
   rules:
     - when: always
 
