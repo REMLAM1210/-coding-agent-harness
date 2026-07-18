@@ -34,9 +34,12 @@ class CredentialStore:
     def get_key(self) -> str | None:
         # Priority 1: keyring
         if self._backend is not None:
-            key = self._backend.get_password(self.SERVICE, self.USER)
-            if key:
-                return key
+            try:
+                key = self._backend.get_password(self.SERVICE, self.USER)
+                if key:
+                    return key
+            except Exception:
+                pass  # No backend available (e.g. headless Linux CI) → fall through
         # Priority 2: env var
         key = os.environ.get(self._env_var)
         if key:
